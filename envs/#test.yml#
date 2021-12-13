@@ -1,0 +1,43 @@
+name: vireo_test
+channels:
+  - conda-forge
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - bzip2=1.0.8=h7f98852_4
+  - c-ares=1.17.2=h7f98852_0
+  - ca-certificates=2021.7.5=h06a4308_1
+  - cellsnp-lite=1.2.1=h22771d5_0
+  - certifi=2021.5.30=py310h06a4308_0
+  - htslib=1.12=h9093b5e_1
+  - krb5=1.19.2=hcc1bbae_2
+  - ld_impl_linux-64=2.36.1=hea4e1c9_2
+  - libcurl=7.79.1=h2574ce0_1
+  - libdeflate=1.7=h7f98852_5
+  - libedit=3.1.20210714=h7f8727e_0
+  - libev=4.33=h516909a_1
+  - libffi=3.4.2=h9c3ff4c_4
+  - libgcc-ng=11.2.0=h1d223b6_9
+  - libgomp=11.2.0=h1d223b6_9
+  - libnghttp2=1.43.0=h812cca2_1
+  - libssh2=1.10.0=ha56f1ee_2
+  - libstdcxx-ng=11.2.0=he4da1e4_9
+  - libuuid=2.32.1=h7f98852_1000
+  - libzlib=1.2.11=h36c2ea0_1013
+  - ncurses=6.2=h58526e2_4
+  - openssl=1.1.1l=h7f98852_0
+  - pip=21.2.4=pyhd8ed1ab_0
+  - python=3.10.0=h62f1059_0_cpython
+  - readline=8.1=h46c0cb4_0
+  - setuptools=58.0.4=py310h06a4308_0
+  - sqlite=3.36.0=h9cd32fc_2
+  - threadpoolctl=3.0.0=pyh8a188c0_0
+  - tk=8.6.11=h27826a3_1
+  - tzdata=2021c=he74cb21_0
+  - wheel=0.37.0=pyhd8ed1ab_1
+  - xz=5.2.5=h516909a_1
+  - zlib=1.2.11=h36c2ea0_1013
+#prefix: /scratch/midway2/barr/miniconda3/envs/vireo

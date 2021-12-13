@@ -1,0 +1,139 @@
+---
+title: "Sample QC"
+output: html_notebook
+params: 
+    sample: '/project2/gilad/kenneth/ebQTL/lowpass/batch3/1019/YG-KB-10X-10S-1008-1012-1_human/'
+    demultiplex: 'vireo'
+---
+
+```{r}
+library(Seurat)
+library(ggplot2)
+library(limma)
+library(cowplot)
+
+source('/project2/gilad/kenneth/HumanChimpEBsOrtho/Analysis/utilities.R')
+
+options(future.globals.maxSize= 50000*1024^2)
+```
+
+```{r}
+#dir <- '/project2/gilad/kenneth/ebQTL/testrun/YG-KB-10X-10S-1008-1008-1_human/'
+dir <- params$sample
+```
+
+```{r}
+obj <- CreateSeuratObject(Read10X(data.dir=paste0(dir, "outs/filtered_feature_bc_matrix/")))
+```
+
+```{r}
+donor_ids <- read.table(paste0(dir, 'vireo/donor_ids.tsv'), header = TRUE, stringsAsFactors = FALSE)
+prop      <- read.table(paste0(dir, 'vireo/prop_ambient.tsv'), header = TRUE, stringsAsFactors = FALSE)
+```
+
+```{r}
+# add the proportion of the best singlet to each call
+inds <- unique(donor_ids$best_singlet)
+donor_ids$prop_donor <- 0
+for (i in 1:length(inds)) {
+  w <- which(donor_ids$best_singlet==inds[i])
+  donor_ids$prop_donor[w] <- prop[w,inds[i]]
+}
+
+obj <- AddMetaData(obj, donor_ids$donor_id,   col.name ='individual')
+obj <- AddMetaData(obj, donor_ids$prob_max,   col.name ='prob.singlet')
+obj <- AddMetaData(obj, donor_ids$prop_donor, col.name ='prop.donor')
+```
+
+```{r}
+obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^MT-")
+```
+
+```{r}
+plist <- list()
+for (i in unique(obj$individual))
+{
+    plist[[i]] <- FeatureScatter(obj, cells = WhichCells(obj, expression=(individual==i)), feature1 = "nCount_RNA", feature2 = "percent.mt") + ggtitle(paste(i)) + NoLegend() + xlim(0, 100000) + ylim(0, 50)
+}
+print(plot_grid(plotlist = plist))
+```
+
+```{r}
+plist <- list()
+for (i in unique(obj$individual))
+{
+    plist[[i]] <- FeatureScatter(obj, cells = WhichCells(obj, expression=(individual==i)), feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + ggtitle(paste(i)) + NoLegend() + xlim(0, 100000) + ylim(0, 10000)
+}
+print(plot_grid(plotlist = plist))
+```
+
+```{r}
+plist <- list()
+for (i in unique(obj$individual))
+{
+    plist[[i]] <- ggplot(obj@meta.data[obj@meta.data$individual==i,], aes(x=nFeature_RNA)) + geom_histogram() + ggtitle(paste(i)) + NoLegend() + theme_bw()
+}
+print(plot_grid(plotlist = plist))
+```
+
+Summary of the dataset
+
+```{r}
+dim(obj)
+summary(obj$nCount_RNA)
+summary(obj$nFeature_RNA)
+for (i in unique(obj$individual)) {
+  print(i)
+  w <- which(obj$individual==i)
+  print(summary(obj$nCount_RNA[w]))
+  print(summary(obj$nFeature_RNA[w]))
+}
+```
+
+```{r}
+obj <- supp(SCTransform(obj, variable.features.n = 5000, verbose = FALSE))
+```
+
+```{r}
+obj <- RunPCA(obj, verbose = FALSE, npcs = 100)
+obj <- RunUMAP(obj, dims = 1:100, verbose = FALSE)
+```
+
+```{r}
+obj <- FindNeighbors(obj, dims = 1:100)
+```
+
+```{r}
+obj <- FindClusters(obj, verbose = FALSE)
+```
+
+```{r}
+DimPlot(obj)
+```
+
+```{r}
+FeaturePlot(obj, "nCount_RNA", reduction = "umap")
+FeaturePlot(obj, "nFeature_RNA", reduction = "umap")
+FeaturePlot(obj, "percent.mt", reduction = "umap")
+```
+
+```{r}
+FeaturePlot(obj, "POU5F1", reduction = "umap")
+FeaturePlot(obj, "LUM", reduction = "umap")
+FeaturePlot(obj, "PAX6", reduction = "umap")
+FeaturePlot(obj, "NEUROD1", reduction = "umap")
+FeaturePlot(obj, "SOX10", reduction = "umap")
+FeaturePlot(obj, "ALB", reduction = "umap")
+FeaturePlot(obj, "TNNT2", reduction = "umap")
+FeaturePlot(obj, "MIXL1", reduction = "umap")
+
+```
+
+```{r}
+DimPlot(obj, split.by = "individual", ncol = 3)
+```
+
+```{r}
+saveRDS(obj, file=paste0(dir, "/obj.rds"))
+```
+
